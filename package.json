@@ -24,7 +24,7 @@
     "eslint-plugin-flowtype": "2.35.0",
     "flow-bin": "0.52.0",
     "flow-runtime": "0.13.0",
-    "mocha": "3.4.2",
+    "mocha": "4.1.0",
     "nyc": "11.0.3"
   },
   "author": "Juan Picado <juanpicado19@gmail.com>",
