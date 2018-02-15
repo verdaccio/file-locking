@@ -31,7 +31,7 @@
   "license": "MIT",
   "dependencies": {
     "lockfile": "1.0.3",
-    "lodash": "4.17.4"
+    "lodash": "4.17.5"
   },
   "nyc": {
     "include": [
