@@ -1,16 +1,12 @@
-/* @flow */
-
-import * as locker from 'lockfile';
-import * as fs from 'fs';
+import locker from 'lockfile';
+import fs from 'fs';
 import path from 'path';
-import type {Callback} from '@verdaccio/types';
-import type {LockOptions} from '@verdaccio/file-locking';
+import { Callback } from '@verdaccio/types';
 
 // locks a file by creating a lock file
 const lockFile = function(name: string, callback: Callback) {
-
-  const statDir = (name) => {
-    return new Promise((resolve, reject) => {
+  const statDir = (name: string) => {
+    return new Promise<any>((resolve, reject) => {
       // test to see if the directory exists
       const dirPath = path.dirname(name);
       fs.stat(dirPath, function(err, stats) {
@@ -25,8 +21,8 @@ const lockFile = function(name: string, callback: Callback) {
     });
   };
 
-  const statfile = (name) => {
-    return new Promise((resolve, reject) => {
+  const statfile = (name: string) => {
+    return new Promise<any>((resolve, reject) => {
       // test to see if the directory exists
       fs.stat(name, function(err, stats) {
         if (err) {
@@ -40,8 +36,8 @@ const lockFile = function(name: string, callback: Callback) {
     });
   };
 
-  const lockfile = (name) => {
-    return new Promise((resolve) => {
+  const lockfile = (name: string) => {
+    return new Promise(resolve => {
       const lockOpts = {
         // time (ms) to wait when checking for stale locks
         wait: 1000,
@@ -52,7 +48,7 @@ const lockFile = function(name: string, callback: Callback) {
         // number of times to attempt to create a lock
         retries: 100,
         // time (ms) between tries
-        retryWait: 100,
+        retryWait: 100
       };
       const lockFileName = `${name}.lock`;
       locker.lock(lockFileName, lockOpts, () => {
@@ -61,21 +57,26 @@ const lockFile = function(name: string, callback: Callback) {
     });
   };
 
-  Promise.resolve().then(() => {
-    return statDir(name);
-  }).then(() => {
-    return statfile(name);
-  }).then(() => {
-    return lockfile(name);
-  }).then(() => {
-    callback(null);
-  }).catch((err) => {
-    callback(err);
-  });
+  Promise.resolve()
+    .then(() => {
+      return statDir(name);
+    })
+    .then(() => {
+      return statfile(name);
+    })
+    .then(() => {
+      return lockfile(name);
+    })
+    .then(() => {
+      callback(null);
+    })
+    .catch(err => {
+      callback(err);
+    });
 };
 
 // unlocks file by removing existing lock file
-const unlockFile= function(name: string, next: Callback) {
+const unlockFile = function(name: string, next: Callback) {
   const lockFileName = `${name}.lock`;
   locker.unlock(lockFileName, function() {
     return next(null);
@@ -91,7 +92,7 @@ const unlockFile= function(name: string, next: Callback) {
  * @param {*} options
  * @param {*} callback
  */
-function readFile(name: string, options: LockOptions = {}, callback: any = () => {}) {
+function readFile(name: string, options: any = {}, callback: any = () => {}) {
   if (typeof options === 'function') {
     callback = options;
     options = {};
@@ -100,13 +101,13 @@ function readFile(name: string, options: LockOptions = {}, callback: any = () =>
   options.lock = options.lock || false;
   options.parse = options.parse || false;
 
-  const lock = function(options) {
-    return new Promise((resolve, reject) => {
+  const lock = function(options: { lock: string }) {
+    return new Promise<any>((resolve, reject) => {
       if (!options.lock) {
         return resolve(null);
       }
 
-      lockFile(name, function(err) {
+      lockFile(name, function(err: any) {
         if (err) {
           return reject(err);
         }
@@ -116,7 +117,7 @@ function readFile(name: string, options: LockOptions = {}, callback: any = () =>
   };
 
   const read = function() {
-    return new Promise((resolve, reject) => {
+    return new Promise<any>((resolve, reject) => {
       fs.readFile(name, 'utf8', function(err, contents) {
         if (err) {
           return reject(err);
@@ -127,7 +128,7 @@ function readFile(name: string, options: LockOptions = {}, callback: any = () =>
     });
   };
 
-  const parseJSON = function(contents) {
+  const parseJSON = function(contents: any) {
     return new Promise((resolve, reject) => {
       if (!options.parse) {
         return resolve(contents);
@@ -141,17 +142,24 @@ function readFile(name: string, options: LockOptions = {}, callback: any = () =>
     });
   };
 
-  Promise.resolve().then(()=> {
-    return lock(options);
-  }).then(() => {
-    return read();
-  }).then((content) => {
-    return parseJSON(content);
-  }).then((result) => {
-    callback(null, result);
-  }, (err) => {
-    callback(err);
-  });
+  Promise.resolve()
+    .then(() => {
+      return lock(options);
+    })
+    .then(() => {
+      return read();
+    })
+    .then(content => {
+      return parseJSON(content);
+    })
+    .then(
+      result => {
+        callback(null, result);
+      },
+      err => {
+        callback(err);
+      }
+    );
 }
 
-export {lockFile, unlockFile, readFile};
+export { lockFile, unlockFile, readFile };
